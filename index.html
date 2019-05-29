@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ISS</title>
+    
+    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+    </style>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+
+</head>
+<body>
+    <h1>Donde esta la ISS</h1>
+
+    <p>Latitud: <span id="lat"></span><br><br>
+        Longitud: <span id="lon"></span>
+    </p>
+
+
+    <div id="map"></div>
+
+
+</body>
+
+<style>
+#map { 
+    height: 500px;
+    
+}
+
+</style>
+
+<script>
+    
+    async function getIss(){
+
+        const respuesta = await fetch('https://api.wheretheiss.at/v1/satellites/25544')
+        const datos = await respuesta.json()
+        const lat = datos.latitude
+        const lon = datos.longitude
+        
+        document.getElementById('lat').textContent=lat;
+        document.getElementById('lon').textContent=lon;
+        
+        console.log(lat, lon)
+
+        var map = new ol.Map({
+            target: 'map',
+            layers: [ new ol.layer.Tile({
+                    source: new ol.source.OSM()
+            })
+            ],
+            view: new ol.View({
+            center: ol.proj.fromLonLat([
+            lat, lon]),
+        zoom: 2
+        })
+        });
+
+    
+    var marker = new ol.Feature({
+        geometry: new ol.geom.Point(
+            ol.proj.fromLonLat([lat,lon])
+        ), 
+        });
+    var vectorSource = new ol.source.Vector({
+    features: [marker]
+    });
+    var markerVectorLayer = new ol.layer.Vector({
+    source: vectorSource,
+    });
+    map.addLayer(markerVectorLayer);
+    marker.setStyle(new ol.style.Style({
+        image: new ol.style.Icon(({
+            crossOrigin: 'anonymous',
+            src: 'sat.png',
+            scale: 0.1
+            }))
+        }));
+                
+
+       
+        
+    };
+getIss()
+    
+    
+    
+    
+</script>
+
+
+
+
+
+</html>
